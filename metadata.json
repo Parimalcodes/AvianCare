@@ -1,0 +1,7 @@
+{
+  "name": "AvianCare: Bird Diet & Med Tracker",
+  "description": "A comprehensive companion for cockatiel and budgie owners to track diet, schedule medications, and receive persistent reminders for bird care.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
