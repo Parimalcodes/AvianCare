@@ -21,11 +21,12 @@ import {
   Pill, 
   Utensils, 
   BrainCircuit,
-  Bell
+  Bell,
+  Settings
 } from 'lucide-react';
 
 const App: React.FC = () => {
-  const STORAGE_KEY = 'avian_care_v1';
+  const STORAGE_KEY = 'avian_care_v2';
 
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'birds' | 'meds' | 'diet' | 'ai'>('dashboard');
@@ -155,32 +156,55 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-slate-50 relative overflow-hidden">
+    <div className="flex flex-col h-[100dvh] max-w-md mx-auto bg-slate-50 relative overflow-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      {/* Decorative Blobs */}
+      <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute top-1/2 -left-32 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl animate-float [animation-delay:2s]" />
+      <div className="absolute -bottom-24 right-0 w-72 h-72 bg-indigo-400/10 rounded-full blur-3xl animate-float [animation-delay:4s]" />
+
       {overdueCount > 0 && (
-        <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between text-xs font-bold animate-pulse sticky top-0 z-50 shadow-lg">
-          <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 animate-ring" />
-            <span>URGENT: {overdueCount} CARE TASKS PENDING</span>
+        <div className="bg-rose-500 text-white px-5 py-4 flex items-center justify-between text-[11px] font-black animate-in slide-in-from-top duration-500 sticky top-0 z-[60] shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 p-1.5 rounded-lg">
+              <Bell className="w-4 h-4 animate-ring" />
+            </div>
+            <span className="uppercase tracking-[0.1em]">Action Required: {overdueCount} care tasks</span>
           </div>
-          <button onClick={() => setActiveTab('dashboard')} className="bg-white text-red-600 px-3 py-1 rounded-full text-[10px] uppercase">FIX NOW</button>
+          <button 
+            onClick={() => setActiveTab('dashboard')} 
+            className="bg-white text-rose-600 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest active:scale-95 transition-transform"
+          >
+            Fix Now
+          </button>
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto pb-28 p-5">
+      <div className="flex-1 overflow-y-auto pb-32 p-6 relative z-10 no-scrollbar">
         {activeTab === 'dashboard' && <Dashboard birds={birds} tasks={todayTasks} onToggleTask={toggleTaskCompletion} />}
         {activeTab === 'birds' && (
-          <div className="space-y-5">
-            <div className="flex justify-between items-center mb-2">
-              <h1 className="text-3xl font-black text-slate-900">Aviary</h1>
-              <button onClick={() => setIsAddBirdOpen(true)} className="bg-blue-600 text-white p-3 rounded-2xl shadow-xl shadow-blue-200"><Plus className="w-6 h-6" /></button>
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Your flock</h1>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Manage your feather friends</p>
+              </div>
+              <button onClick={() => setIsAddBirdOpen(true)} className="bg-blue-600 text-white p-4 rounded-[22px] shadow-[0_15px_30px_rgba(37,99,235,0.3)] active:scale-90 transition-transform">
+                <Plus className="w-6 h-6" />
+              </button>
             </div>
             {birds.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                <BirdIcon className="w-16 h-16 mx-auto mb-4 text-slate-200" />
-                <p className="text-slate-400 font-medium">Your flock is empty.</p>
-                <button onClick={() => setIsAddBirdOpen(true)} className="mt-4 text-blue-600 font-bold text-sm">Add your first bird</button>
+              <div className="text-center py-24 bg-white/60 backdrop-blur-md rounded-[40px] border-2 border-dashed border-slate-200">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <BirdIcon className="w-10 h-10 text-slate-200" />
+                </div>
+                <p className="text-slate-400 font-bold text-sm">No birds in your aviary yet.</p>
+                <button onClick={() => setIsAddBirdOpen(true)} className="mt-6 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">Add First Bird</button>
               </div>
-            ) : birds.map(bird => <BirdProfile key={bird.id} bird={bird} onDelete={() => deleteBird(bird.id)} />)}
+            ) : (
+              <div className="grid gap-4">
+                {birds.map(bird => <BirdProfile key={bird.id} bird={bird} onDelete={() => deleteBird(bird.id)} />)}
+              </div>
+            )}
           </div>
         )}
         {activeTab === 'meds' && <MedicationManager birds={birds} medications={medications} setMedications={setMedications} />}
@@ -188,28 +212,31 @@ const App: React.FC = () => {
         {activeTab === 'ai' && <AIAdvisor birds={birds} dietLogs={dietLogs} />}
       </div>
 
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/80 backdrop-blur-xl border-t border-slate-100 flex justify-around items-center h-24 safe-area-bottom shadow-2xl z-40 px-4">
-        {[
-          { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
-          { id: 'birds', icon: BirdIcon, label: 'Aviary' },
-          { id: 'meds', icon: Pill, label: 'Health' },
-          { id: 'diet', icon: Utensils, label: 'Diet' },
-          { id: 'ai', icon: BrainCircuit, label: 'Coach' }
-        ].map(item => (
-          <button 
-            key={item.id}
-            onClick={() => setActiveTab(item.id as any)}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 px-3 py-2 rounded-2xl ${activeTab === item.id ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'scale-110' : ''}`} />
-            <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
-          </button>
-        ))}
-      </nav>
+      {/* Floating Dock */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-sm z-[70] transition-all">
+        <nav className="glass rounded-[32px] flex justify-around items-center h-20 shadow-[0_20px_50px_rgba(0,0,0,0.15)] px-2">
+          {[
+            { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
+            { id: 'birds', icon: BirdIcon, label: 'Aviary' },
+            { id: 'meds', icon: Pill, label: 'Health' },
+            { id: 'diet', icon: Utensils, label: 'Diet' },
+            { id: 'ai', icon: BrainCircuit, label: 'Coach' }
+          ].map(item => (
+            <button 
+              key={item.id}
+              onClick={() => setActiveTab(item.id as any)}
+              className={`flex flex-col items-center gap-1 transition-all duration-300 w-14 h-14 rounded-2xl justify-center ${activeTab === item.id ? 'bg-slate-900 text-white shadow-xl scale-110 -translate-y-2' : 'text-slate-400 hover:text-slate-600 active:scale-90'}`}
+            >
+              <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+              <span className={`text-[8px] font-black uppercase tracking-widest ${activeTab === item.id ? 'block' : 'hidden'}`}>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
 
       {!notificationsEnabled && (
-        <button onClick={requestNotifications} className="fixed bottom-28 right-6 bg-slate-900 text-white p-4 rounded-full shadow-2xl z-50 flex items-center gap-2 text-xs font-bold animate-bounce">
-          <Bell className="w-4 h-4" /> Enable Alerts
+        <button onClick={requestNotifications} className="fixed bottom-28 right-6 bg-white/80 backdrop-blur-md border border-slate-100 text-slate-800 p-4 rounded-full shadow-xl z-50 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest animate-in fade-in zoom-in duration-1000">
+          <Bell className="w-4 h-4 text-blue-500" /> Enable Alerts
         </button>
       )}
 
